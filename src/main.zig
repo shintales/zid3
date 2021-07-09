@@ -6,7 +6,7 @@ pub fn main() anyerror!void {
     var id3 = try zid3.ID3.load(std.heap.page_allocator, filename);
     defer id3.deinit();
 
-    for (id3.frame_headers.items) |frame_header| {
+    for (id3.frame_headers.inner_list.items) |frame_header| {
         //std.debug.print("{s}\n", .{frame_header.id});
         std.debug.print("{s}: {s}\n", .{ frame_header.id, frame_header.content });
     }
