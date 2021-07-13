@@ -9,7 +9,13 @@ pub fn main() anyerror!void {
     for (id3.frame_headers.inner_list.items) |frame_header| {
         //std.debug.print("{s}\n", .{frame_header.id});
         std.debug.print("{s}: {s}\n", .{ frame_header.id, frame_header.content });
+        std.debug.print("{}\n", .{frame_header.getTextFrame()});
     }
-    //const frame_header = id3.frame_headers.items[22];
-    std.debug.print("{s}\n", .{id3.tags.artist});
+    var frame_header = id3.frame_headers.inner_list.items[2];
+    std.debug.print("{s}\n", .{frame_header.getTextFrame().information});
+    try id3.setTitle("Modify");
+    std.debug.print("{s}\n", .{id3.getTitle()});
+    std.debug.print("{s}\n", .{id3.getArtist()});
+
+    try id3.save("out.mp3");
 }

@@ -2,11 +2,18 @@ const std = @import("std");
 const utils = @import("utils.zig");
 const ID3 = @import("zid3.zig").ID3;
 
+const FrameTypes = union {
+    text: TextFrameInformation,
+    link: UrlLinkFrame,
+    comment: CommentFrame,
+};
+
 pub const FrameHeader = struct {
     id: [4]u8,
     size: [4]u8,
     flags: [2]u8,
     content: []u8,
+    const Self = @This();
 
     fn parseFromID3(id3: *ID3) !?FrameHeader {
         var frame_header: [10]u8 = undefined;
@@ -28,6 +35,20 @@ pub const FrameHeader = struct {
             else => null,
         };
     }
+
+    pub fn getTextFrame(self: *const Self) TextFrameInformation {
+        return .{
+            .encoding = self.content[0],
+            .information = self.content[1..],
+        };
+    }
+
+    pub fn getFrame(self: *const Self) FrameTypes {
+        return switch (self.id[0]) {
+            'T' => getTextFrame(),
+            else => unreachable,
+        };
+    }
 };
 
 pub const FrameHeaderList = struct {
@@ -44,7 +65,6 @@ pub const FrameHeaderList = struct {
 
     pub fn parseFromID3(id3: *ID3) !FrameHeaderList {
         var frame_headers = FrameHeaderList.init(id3.allocator);
-        //const end_position = try id3.file.getEndPos();
         const end_position = utils.bytesToInt(u24, &id3.header.size);
         var current_position = try id3.file.getPos();
         while (current_position < end_position) : (current_position = try id3.file.getPos()) {
@@ -66,4 +86,23 @@ pub const FrameHeaderList = struct {
 const TextFrameInformation = struct {
     encoding: u8,
     information: []u8,
+};
+
+const UrlLinkFrame = struct { url: []u8 };
+
+const CommentFrame = struct {
+    encoding: u8,
+    language: [3]u8,
+    //Short content descrip.  <text string according to encoding> $00 (00)
+    description: []u8,
+    //The actual text         <full text string according to encoding>
+    text: []u8,
+};
+
+const PictureFrame = struct {
+    encoding: u8,
+    mime_type: []u8,
+    picture_type: u8,
+    description: []u8,
+    picture_data: []u8,
 };
