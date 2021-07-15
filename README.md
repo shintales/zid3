@@ -2,6 +2,9 @@
 
 This is a library written in Zig with the ability to read id3 tags from mp3 files.
 
+This was created with the sole purpose of learning Zig. It is free to use however 
+one sees fit.
+
 ## Features
 Get metadata information for common tags in id3 v2.3 format.
 
