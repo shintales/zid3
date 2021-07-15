@@ -6,8 +6,7 @@ This is a library written in Zig with the ability to read id3 tags from mp3 file
 Get metadata information for common tags in id3 v2.3 format.
 
 ## Usage
-This was built and tested with Zig 0.8.0 stable release. Unsure if it will work
-on any 0.9 dev releases
+This should work with Zig 0.8 stable and 0.9 dev releases
 
 ```zig
 // Import the module
