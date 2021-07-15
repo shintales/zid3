@@ -2,3 +2,5 @@ zig-cache
 zig-out
 .gyro
 *.mp3
+deps.zig
+gyro.lock

@@ -1,0 +1,19 @@
+pkgs:
+  zid3:
+    version: 0.0.0
+    description: "Simple ID3v2 metadata reader"
+    license: MIT
+    source_url: "https://github.com/tajali016/zid3"
+    tags:
+      id3v2
+      metadata
+      id3-reader
+      id3
+      metadata-extraction
+      mp3-tags
+
+    root: src/zid3.zig
+    files:
+      README.md
+      LICENSE
+      src/*.zig
