@@ -8,6 +8,7 @@ pub fn main() anyerror!void {
 
     std.debug.print("{s}\n", .{id3.getTitle()});
     std.debug.print("{s}\n", .{id3.getArtist()});
+    std.debug.print("{s}\n", .{id3.getTag("TPUB")});
 
     try id3.save("out.mp3");
 }

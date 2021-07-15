@@ -2,8 +2,9 @@
 
 This is a library written in Zig with the ability to read id3 tags from mp3 files.
 
-This was created with the sole purpose of learning Zig. It is free to use however 
-one sees fit.
+This project is created with the sole purpose of learning Zig. It is likely not 
+to become feature complete; however, it is free to use and incorporate in other
+projects however one sees fit.
 
 ## Features
 Get metadata information for common tags in id3 v2.3 format.
@@ -29,7 +30,7 @@ pub fn main() anyerror!void {
 
     // Examples of getting tag that does not have predefined function. This uses
     // the ID3v2 frame id
-    std.debug.print("{s}\n", .{id3.getTag("APIC")});
+    std.debug.print("{s}\n", .{id3.getTag("TPUB")});
 }
 ```
 
