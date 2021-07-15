@@ -27,9 +27,9 @@ pub const FrameHeader = struct {
 
         return switch (id[0]) {
             'T', 'W', 'C', 'A', 'P' => FrameHeader{
-                .id = frame_header[0..4].*,
-                .size = frame_header[4..8].*,
-                .flags = frame_header[8..10].*,
+                .id = id,
+                .size = size,
+                .flags = flags,
                 .content = content,
             },
             else => null,
