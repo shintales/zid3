@@ -3,7 +3,7 @@ const utils = @import("utils.zig");
 const ID3 = @import("zid3.zig").ID3;
 
 const FrameTypes = union {
-    text: TextFrameInformation,
+    text: TextFrame,
     link: UrlLinkFrame,
     comment: CommentFrame,
 };
@@ -36,7 +36,7 @@ pub const FrameHeader = struct {
         };
     }
 
-    pub fn getTextFrame(self: *const Self) TextFrameInformation {
+    pub fn getTextFrame(self: *const Self) TextFrame {
         return .{
             .encoding = self.content[0],
             .information = self.content[1..],
@@ -83,7 +83,7 @@ pub const FrameHeaderList = struct {
     }
 };
 
-const TextFrameInformation = struct {
+const TextFrame = struct {
     encoding: u8,
     information: []u8,
 };

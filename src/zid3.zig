@@ -10,6 +10,7 @@ pub const ID3 = struct {
     allocator: *std.mem.Allocator,
     const Self = @This();
 
+    /// Load the contents of an mp3 file into the ID3 struct
     pub fn load(allocator: *std.mem.Allocator, filename: []const u8) !Self {
         var file = try std.fs.openFileAbsolute(filename, .{});
         defer file.close();
@@ -33,57 +34,59 @@ pub const ID3 = struct {
         self.frame_headers.deinit();
     }
 
+    /// Save ID3 information to file 
+    /// [TODO] The saved file is corrupted and not in proper format. Need to figure
+    /// out how to write frames that have encoding.
     pub fn save(self: *Self, filename: []const u8) !void {
-        var output: [100]u8 = undefined;
-        _ = try std.fmt.bufPrint(&output, "/home/shintales/GitRepositories/zid3/{s}", .{filename});
-        var file = try std.fs.createFileAbsolute(&output, .{});
+        var full_path = try std.fmt.allocPrint(self.allocator, "/home/shintales/GitRepositories/zid3/{s}", .{filename});
+        var file = try std.fs.createFileAbsolute(full_path, .{});
         defer file.close();
 
-        try file.writeAll(std.mem.asBytes(&self.header));
+        _ = try file.write(std.mem.asBytes(&self.header));
         for (self.frame_headers.inner_list.items) |frame_header| {
-            try file.writeAll(std.mem.asBytes(&frame_header));
+            _ = try file.write(&frame_header.id);
+            _ = try file.write(&frame_header.size);
+            _ = try file.write(&frame_header.flags);
+            _ = try file.writeAll(frame_header.content);
         }
     }
 
-    pub fn xxformat(
-        self: Self,
-        comptime fmt: []const u8,
-        options: std.fmt.FormatOptions,
-        writer: anytype,
-    ) !void {
-        try writer.print("ID: {s}\nVersion: {s}\n Flags: {s}\nSize: {s}", .{
-            self.header.id,
-            self.header.version,
-            self.header.flags,
-            self.header.size,
-        });
-    }
-
-    // Handle tag information retriveal
+    /// Get the title of the song
     pub fn getTitle(self: *Self) []u8 {
         return self.getTagInformation("TIT2");
     }
 
+    /// Get the artist of the song
     pub fn getArtist(self: *Self) []u8 {
         return self.getTagInformation("TPE1");
     }
 
+    /// Get the album song is from
     pub fn getAlbum(self: *Self) []u8 {
         return self.getTagInformation("TALB");
     }
+
+    /// Get names of artist listed on album
     pub fn getAlbumArtist(self: *Self) []u8 {
         return self.getTagInformation("TPE2");
     }
+
+    /// Get the genre from song
     pub fn getGenre(self: *Self) []u8 {
         return self.getTagInformation("TCON");
     }
+
+    /// Get the track number of song
     pub fn getTrack_num(self: *Self) []u8 {
         return self.getTagInformation("TRCK");
     }
+
+    /// Get the year song was released
     pub fn getYear(self: *Self) []u8 {
         return self.getTagInformation("TYER");
     }
 
+    /// Parse the tag information
     fn getTagInformation(self: *Self, id: []const u8) []u8 {
         for (self.frame_headers.inner_list.items) |frame_header| {
             if (std.mem.eql(u8, frame_header.id[0..], id)) {
@@ -95,27 +98,38 @@ pub const ID3 = struct {
         return undefined;
     }
 
-    // Handle tag information setting
+    /// Set song title
     pub fn setTitle(self: *Self, input: []const u8) !void {
         try self.setTagInformation("TIT2", input);
     }
 
+    /// Set artist name
     pub fn setArtist(self: *Self, input: []const u8) !void {
         try self.setTagInformation("TPE1", input);
     }
 
+    /// Set album name
     pub fn setAlbum(self: *Self, input: []const u8) !void {
         try self.setTagInformation("TALB", input);
     }
+
+    /// Set album artist name(s)
+    /// List names as comma seperated string
     pub fn setAlbumArtist(self: *Self, input: []const u8) !void {
         try self.setTagInformation("TPE2", input);
     }
+
+    /// Set genre
     pub fn setGenre(self: *Self, input: []const u8) !void {
         try self.setTagInformation("TCON", input);
     }
+
+    /// Set track number
     pub fn setTrackNum(self: *Self, input: []const u8) !void {
         try self.setTagInformation("TRCK", input);
     }
+
+    ///Set year released
     pub fn setYear(self: *Self, input: []const u8) !void {
         try self.setTagInformation("TYER", input);
     }
@@ -129,15 +143,7 @@ pub const ID3 = struct {
                     else => unreachable,
                 };
                 frame_header.content = try self.allocator.realloc(frame_header.content, input.len + preserve.len);
-                var i: u8 = 0;
-                for (preserve) |char| {
-                    frame_header.content[i] = char;
-                    i += 1;
-                }
-                for (input) |char| {
-                    frame_header.content[i] = char;
-                    i += 1;
-                }
+                frame_header.content = try std.mem.concat(self.allocator, u8, &[_][]const u8{ preserve, input });
                 break;
             }
         }

@@ -33,5 +33,6 @@ pub fn parseHeader(file: *std.fs.File) !Header {
         .flags = buffer[5..6].*,
         .size = buffer[6..10].*,
     };
+    std.log.debug("{s}", .{buffer});
     return header;
 }
