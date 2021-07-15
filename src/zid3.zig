@@ -5,6 +5,7 @@ usingnamespace @import("frames.zig");
 
 pub const ID3 = struct {
     header: Header,
+    extended_header: ?ExtendedHeader,
     frame_headers: FrameHeaderList,
     file: std.fs.File,
     allocator: *std.mem.Allocator,
@@ -17,12 +18,14 @@ pub const ID3 = struct {
 
         var id3 = Self{
             .header = undefined,
+            .extended_header = null,
             .frame_headers = undefined,
             .file = file,
             .allocator = allocator,
         };
 
-        id3.header = try parseHeader(&id3.file);
+        id3.header = try Header.parseFromFile(&id3.file);
+        id3.extended_header = try ExtendedHeader.parseFromID3(&id3);
         id3.frame_headers = try FrameHeaderList.parseFromID3(&id3);
         std.debug.print("ID: {s}\nSize: {}\nVersion: {s}\n", .{ id3.header.id, utils.bytesToInt(u32, &id3.header.size), id3.header.version });
         std.debug.print("File size: {}\n", .{id3.file.getEndPos()});
@@ -53,41 +56,41 @@ pub const ID3 = struct {
 
     /// Get the title of the song
     pub fn getTitle(self: *Self) []u8 {
-        return self.getTagInformation("TIT2");
+        return self.getTag("TIT2");
     }
 
     /// Get the artist of the song
     pub fn getArtist(self: *Self) []u8 {
-        return self.getTagInformation("TPE1");
+        return self.getTag("TPE1");
     }
 
     /// Get the album song is from
     pub fn getAlbum(self: *Self) []u8 {
-        return self.getTagInformation("TALB");
+        return self.getTag("TALB");
     }
 
     /// Get names of artist listed on album
     pub fn getAlbumArtist(self: *Self) []u8 {
-        return self.getTagInformation("TPE2");
+        return self.getTag("TPE2");
     }
 
     /// Get the genre from song
     pub fn getGenre(self: *Self) []u8 {
-        return self.getTagInformation("TCON");
+        return self.getTag("TCON");
     }
 
     /// Get the track number of song
-    pub fn getTrack_num(self: *Self) []u8 {
-        return self.getTagInformation("TRCK");
+    pub fn getTrackNum(self: *Self) []u8 {
+        return self.getTag("TRCK");
     }
 
     /// Get the year song was released
     pub fn getYear(self: *Self) []u8 {
-        return self.getTagInformation("TYER");
+        return self.getTag("TYER");
     }
 
-    /// Parse the tag information
-    fn getTagInformation(self: *Self, id: []const u8) []u8 {
+    /// Parse the tag information based on the ID3v2 frame id
+    pub fn getTag(self: *Self, id: []const u8) []u8 {
         for (self.frame_headers.inner_list.items) |frame_header| {
             if (std.mem.eql(u8, frame_header.id[0..], id)) {
                 if (frame_header.getTextFrame().encoding == 1)

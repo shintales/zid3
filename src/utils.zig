@@ -7,3 +7,7 @@ pub fn bytesToInt(comptime T: type, bytes: []const u8) T {
     }
     return result;
 }
+
+pub fn checkBit(comptime T: type, value: T, bit_to_check: T) bool {
+    return (value & bit_to_check) == bit_to_check;
+}
