@@ -3,7 +3,7 @@ pkgs:
     version: 0.0.0
     description: "Simple ID3v2 metadata reader"
     license: MIT
-    source_url: "https://github.com/tajali016/zid3"
+    source_url: "https://github.com/shintales/zid3"
     tags:
       id3v2
       metadata
